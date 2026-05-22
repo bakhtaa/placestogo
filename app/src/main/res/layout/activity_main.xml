@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#B8D8D8">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#7ECECA"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🗺️ FavPlaces"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"/>
+
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bienvenue !"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="13sp"
+            android:textColor="#E0F7F7"
+            android:layout_marginTop="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Boutons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
+
+
+        <Button
+            android:id="@+id/btnExplore"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="🌍 Explorer des lieux"
+            android:textSize="16sp"
+            android:backgroundTint="#7ECECA"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnMyLocation"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📍 Ma localisation"
+            android:textSize="16sp"
+            android:backgroundTint="#7ECECA"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnAddPlace"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="➕ Ajouter un lieu"
+            android:textSize="16sp"
+            android:backgroundTint="#98D4BB"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnViewList"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📋 Mes lieux favoris"
+            android:textSize="16sp"
+            android:backgroundTint="#C4B8D8"/>
+
+    </LinearLayout>
+
+</LinearLayout>

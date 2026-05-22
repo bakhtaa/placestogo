@@ -1,0 +1,43 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Fichiers de build
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# Configuration Android Studio
+.idea/
+
+.navigation/
+captures/
+
+
+# Configuration locale (contient ton chemin vers le SDK, NE PAS PARTAGER)
+
+
+# Clés et certificats (TRÈS IMPORTANT de ne pas les commiter)
+*.jks
+*.keystore
+google-services.json
+
+# Logs
+*.log
+
+# Cache KSP/Kotlin
+.kotlin/

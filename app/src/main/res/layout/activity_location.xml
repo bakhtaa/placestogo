@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#B8D8D8">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="#7ECECA"
+        android:gravity="center_vertical"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Retour"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#7ECECA"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📍 Ma localisation"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+    <!-- Contenu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/locationTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="En attente..."
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textColor="#4A5940"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/btnGetLocation"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📍 Position unique"
+            android:backgroundTint="#7ECECA"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnStartUpdates"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="▶ Démarrer suivi (5s)"
+            android:backgroundTint="#98D4BB"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnStopUpdates"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="⏹ Arrêter suivi"
+            android:backgroundTint="#C4B8D8"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</LinearLayout>
