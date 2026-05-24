@@ -6,10 +6,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,10 +22,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.placesproject.data.database.PlaceDatabase
 import com.example.placesproject.data.model.Place
 import com.example.placesproject.data.repository.PlaceRepository
 import com.example.placesproject.databinding.ActivityMainBinding
+import com.example.placesproject.databinding.DialogAddPlaceBinding
 import com.example.placesproject.viewmodel.PlaceViewModel
 import com.example.placesproject.viewmodel.PlaceViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,6 +37,8 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -42,12 +51,45 @@ class MainActivity : AppCompatActivity() {
     private var currentLat = 0.0
     private var currentLon = 0.0
 
+    // Image sélectionnée
+    private var selectedImageUri: String = ""
+    private lateinit var dialogBinding: DialogAddPlaceBinding
+
+    // Launcher galerie
+    private val galleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it.toString()
+            dialogBinding.ivPreview.visibility = android.view.View.VISIBLE
+            Glide.with(this).load(it).centerCrop().into(dialogBinding.ivPreview)
+        }
+    }
+
+    // Launcher caméra
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        bitmap?.let {
+            val uri = saveBitmapToFile(it)
+            selectedImageUri = uri.toString()
+            dialogBinding.ivPreview.visibility = android.view.View.VISIBLE
+            Glide.with(this).load(uri).centerCrop().into(dialogBinding.ivPreview)
+        }
+    }
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) getLocation()
+        else Toast.makeText(this, "Permission refusée", Toast.LENGTH_SHORT).show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Nom utilisateur depuis Login
         val username = intent.getStringExtra("username") ?: "Visiteur"
         binding.tvWelcome.text = "Bienvenue, $username ! 👋"
 
@@ -60,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         sendWelcomeNotification(username)
 
         binding.btnMyLocation.setOnClickListener {
-            checkPermissionAndGetLocation()
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
         binding.btnAddPlace.setOnClickListener { showAddPlaceDialog() }
@@ -72,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnExplore.setOnClickListener {
             startActivity(Intent(this, ExploreActivity::class.java))
         }
+
         binding.btnLogout.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -81,34 +124,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ── GPS ──────────────────────────────────────────────
-
-    private fun checkPermissionAndGetLocation() {
-        if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            getLocation()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_CODE
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation()
-            } else {
-                Toast.makeText(this, "Permission refusée", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     @SuppressLint("MissingPermission")
     private fun getLocation() {
@@ -124,7 +139,6 @@ class MainActivity : AppCompatActivity() {
                     val address = getAddress(location.latitude, location.longitude)
                     binding.tvLocation.text = "📍 $address"
                 }
-                // Ouvrir LocationActivity
                 val intent = Intent(this, LocationActivity::class.java)
                 intent.putExtra("lat", location.latitude)
                 intent.putExtra("lon", location.longitude)
@@ -133,7 +147,6 @@ class MainActivity : AppCompatActivity() {
                 currentLat = 36.8065
                 currentLon = 10.1815
                 binding.tvLocation.text = "📍 Tunis (par défaut)"
-                Toast.makeText(this, "Position par défaut utilisée", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -155,21 +168,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── AJOUTER LIEU ─────────────────────────────────────
+    // ── DIALOG AJOUTER LIEU ───────────────────────────────
 
     private fun showAddPlaceDialog() {
-        val input = android.widget.EditText(this)
-        input.hint = "Nom du lieu"
-        AlertDialog.Builder(this)
-            .setTitle("Ajouter un lieu favori")
-            .setView(input)
+        selectedImageUri = ""
+        dialogBinding = DialogAddPlaceBinding.inflate(LayoutInflater.from(this))
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("➕ Ajouter un lieu")
+            .setView(dialogBinding.root)
             .setPositiveButton("Ajouter") { _, _ ->
-                val name = input.text.toString().trim()
+                val name = dialogBinding.etPlaceName.text.toString().trim()
                 if (name.isNotEmpty()) {
                     val place = Place(
                         name = name,
                         latitude = if (currentLat != 0.0) currentLat else 36.8065,
-                        longitude = if (currentLon != 0.0) currentLon else 10.1815
+                        longitude = if (currentLon != 0.0) currentLon else 10.1815,
+                        imageUrl = selectedImageUri
                     )
                     viewModel.insert(place)
                     sendNotification(name)
@@ -179,7 +194,35 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("Annuler", null)
-            .show()
+            .create()
+
+        dialogBinding.btnCamera.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                cameraLauncher.launch(null)
+            } else {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(Manifest.permission.CAMERA), 102
+                )
+            }
+        }
+
+        dialogBinding.btnGallery.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+
+        dialog.show()
+    }
+
+    // ── UTILITAIRES ───────────────────────────────────────
+
+    private fun saveBitmapToFile(bitmap: Bitmap): Uri {
+        val file = File(cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+        }
+        return Uri.fromFile(file)
     }
 
     // ── NOTIFICATIONS ─────────────────────────────────────

@@ -68,7 +68,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="📍 Ma position"
+            android:text="📍 position"
             android:backgroundTint="#7ECECA"
             android:layout_marginEnd="4dp"/>
 

@@ -12,7 +12,7 @@ import com.example.placesproject.data.model.Comment
 import com.example.placesproject.data.dao.CommentDao
 @Database(
     entities = [Place::class, User::class, Comment::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class PlaceDatabase : RoomDatabase() {

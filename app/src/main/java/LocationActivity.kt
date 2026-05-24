@@ -57,9 +57,10 @@ class LocationActivity : AppCompatActivity(), OnMapReadyCallback {
         // Position reçue depuis MainActivity
         val lat = intent.getDoubleExtra("lat", 0.0)
         val lon = intent.getDoubleExtra("lon", 0.0)
+        val placeName = intent.getStringExtra("place_name") ?: "Lieu"
         if (lat != 0.0) {
             val position = LatLng(lat, lon)
-            googleMap.addMarker(MarkerOptions().position(position).title("Ma position"))
+            googleMap.addMarker(MarkerOptions().position(position).title("position"))
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15f))
             lifecycleScope.launch {
                 val address = getAddress(lat, lon)
