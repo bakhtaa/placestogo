@@ -42,6 +42,7 @@
                 android:textColor="#888888"
                 android:layout_marginBottom="8dp"/>
 
+            <!-- Commentaire -->
             <EditText
                 android:id="@+id/etComment"
                 android:layout_width="match_parent"
@@ -51,12 +52,42 @@
                 android:background="@drawable/rounded_input"
                 android:layout_marginBottom="8dp"/>
 
-            <Button
-                android:id="@+id/btnLike"
+            <!-- Boutons côte à côte -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="❤️ Ajouter aux favoris"
-                android:backgroundTint="#98D4BB"/>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnLike"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="❤️ Favoris"
+                    android:backgroundTint="#98D4BB"
+                    android:layout_marginEnd="4dp"/>
+
+                <Button
+                    android:id="@+id/btnComment"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text=" Commenter"
+                    android:backgroundTint="#7ECECA"
+                    android:layout_marginStart="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Commentaire affiché -->
+            <TextView
+                android:id="@+id/tvComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="13sp"
+                android:textColor="#4A5940"
+                android:padding="8dp"
+                android:visibility="gone"/>
 
         </LinearLayout>
     </LinearLayout>

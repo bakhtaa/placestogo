@@ -8,15 +8,18 @@ import com.example.placesproject.data.model.Place
 import com.example.placesproject.data.dao.PlaceDao
 import com.example.placesproject.data.model.User
 import com.example.placesproject.data.dao.UserDao
+import com.example.placesproject.data.model.Comment
+import com.example.placesproject.data.dao.CommentDao
 @Database(
-    entities = [Place::class, User::class],
-    version = 1,
+    entities = [Place::class, User::class, Comment::class],
+    version = 4,
     exportSchema = false
 )
 abstract class PlaceDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
     abstract fun userDao(): UserDao
+    abstract fun commentDao(): CommentDao
 
     companion object {
 

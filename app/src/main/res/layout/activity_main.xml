@@ -5,7 +5,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#B8D8D8">
-
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:text="🚪 Déconnexion"
+        android:textSize="12sp"
+        android:backgroundTint="#C4B8D8"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="8dp"/>
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"

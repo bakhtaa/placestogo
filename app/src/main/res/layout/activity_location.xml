@@ -35,50 +35,61 @@
 
     </LinearLayout>
 
-    <!-- Contenu -->
-    <LinearLayout
+    <!-- Info adresse -->
+    <TextView
+        android:id="@+id/locationTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="En attente..."
+        android:textSize="14sp"
+        android:gravity="center"
+        android:textColor="#4A5940"
+        android:background="#FFFFFF"
+        android:padding="12dp"/>
+
+    <!-- Carte Google Maps -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="24dp">
+        android:layout_weight="1"/>
 
-        <TextView
-            android:id="@+id/locationTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="En attente..."
-            android:textSize="18sp"
-            android:gravity="center"
-            android:textColor="#4A5940"
-            android:background="#FFFFFF"
-            android:padding="16dp"
-            android:layout_marginBottom="32dp"/>
+    <!-- Boutons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#FFFFFF">
 
         <Button
             android:id="@+id/btnGetLocation"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="📍 Position unique"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="📍 Ma position"
             android:backgroundTint="#7ECECA"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginEnd="4dp"/>
 
         <Button
             android:id="@+id/btnStartUpdates"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="▶ Démarrer suivi (5s)"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="▶ Suivi"
             android:backgroundTint="#98D4BB"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginStart="4dp"/>
 
         <Button
             android:id="@+id/btnStopUpdates"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="⏹ Arrêter suivi"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="⏹ Stop"
             android:backgroundTint="#C4B8D8"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:layout_marginStart="4dp"/>
 
     </LinearLayout>
 
