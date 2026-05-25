@@ -1,28 +1,30 @@
 package com.example.placesproject
 
 import android.content.Intent
+import android.location.Geocoder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.placesproject.data.api.RetrofitClient
 import com.example.placesproject.data.database.PlaceDatabase
 import com.example.placesproject.data.model.Comment
 import com.example.placesproject.data.model.Place
 import com.example.placesproject.data.model.UnsplashPhoto
 import com.example.placesproject.databinding.ActivityExploreBinding
 import com.example.placesproject.databinding.ItemExploreBinding
+import com.example.placesproject.utils.ApiState
+import com.example.placesproject.viewmodel.ExploreViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.location.Geocoder
 import java.util.Locale
 
 class ExploreActivity : AppCompatActivity() {
@@ -31,32 +33,78 @@ class ExploreActivity : AppCompatActivity() {
     private val ACCESS_KEY = "LembTH7zONCbWYuqxbqArFIDL8yNNjTpZq_96nPbFlc"
     private val photos = mutableListOf<UnsplashPhoto>()
     private lateinit var adapter: ExploreAdapter
+    private lateinit var viewModel: ExploreViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExploreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // ViewModel
+        viewModel = ViewModelProvider(this)[ExploreViewModel::class.java]
+
         binding.btnBack.setOnClickListener { finish() }
 
         adapter = ExploreAdapter(
             photos,
             onLike = { photo, comment -> saveToFavorites(photo, comment) },
-            onComment = { comment ->
-                Toast.makeText(this, "💬 Commentaire sauvegardé", Toast.LENGTH_SHORT).show()
-            },
+            onComment = { },
             onCardClick = { photo -> openMap(photo) }
         )
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
 
-        searchPlaces("beautiful places")
+        // Observer les états
+        observeState()
+
+        // Recherche par défaut
+        viewModel.searchPhotos(ACCESS_KEY, "beautiful places")
 
         binding.btnSearch.setOnClickListener {
             val query = binding.etSearch.text.toString().trim()
-            if (query.isNotEmpty()) searchPlaces(query)
-            else searchPlaces("beautiful places")
+            viewModel.searchPhotos(
+                ACCESS_KEY,
+                if (query.isNotEmpty()) query else "beautiful places"
+            )
+        }
+    }
+
+    private fun observeState() {
+        viewModel.state.observe(this) { state ->
+            when (state) {
+
+                is ApiState.Loading -> {
+                    // Afficher le chargement
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.recyclerView.visibility = View.GONE
+                    binding.tvError.visibility = View.GONE
+                }
+
+                is ApiState.Success -> {
+                    // Afficher les résultats
+                    binding.progressBar.visibility = View.GONE
+                    binding.tvError.visibility = View.GONE
+                    binding.recyclerView.visibility = View.VISIBLE
+
+                    photos.clear()
+                    photos.addAll(state.data)
+                    adapter.notifyDataSetChanged()
+
+                    if (photos.isEmpty()) {
+                        binding.tvError.text = "Aucun résultat trouvé"
+                        binding.tvError.visibility = View.VISIBLE
+                    }
+                }
+
+                is ApiState.Error -> {
+                    // Afficher l'erreur
+                    binding.progressBar.visibility = View.GONE
+                    binding.recyclerView.visibility = View.GONE
+                    binding.tvError.visibility = View.VISIBLE
+                    binding.tvError.text = "❌ ${state.message}"
+                }
+            }
         }
     }
 
@@ -79,30 +127,9 @@ class ExploreActivity : AppCompatActivity() {
                 val addresses = geocoder.getFromLocationName(placeName, 1)
                 if (!addresses.isNullOrEmpty()) {
                     Pair(addresses[0].latitude, addresses[0].longitude)
-                } else {
-                    Pair(36.8065, 10.1815) // Tunis par défaut
-                }
+                } else Pair(36.8065, 10.1815)
             } catch (e: Exception) {
                 Pair(36.8065, 10.1815)
-            }
-        }
-    }
-
-    private fun searchPlaces(query: String) {
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.api.searchPhotos(
-                    auth = "Client-ID $ACCESS_KEY",
-                    query = query
-                )
-                photos.clear()
-                photos.addAll(response.results)
-                adapter.notifyDataSetChanged()
-                if (photos.isEmpty()) {
-                    Toast.makeText(this@ExploreActivity, "Aucun résultat", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(this@ExploreActivity, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -158,10 +185,8 @@ class ExploreAdapter(
                 .centerCrop()
                 .into(binding.ivPhoto)
 
-            // Clic sur la photo → ouvre la carte
-            binding.ivPhoto.setOnClickListener {
-                onCardClick(photo)
-            }
+            // Clic sur photo → ouvre carte
+            binding.ivPhoto.setOnClickListener { onCardClick(photo) }
 
             // Charger commentaire existant
             val db = PlaceDatabase.getDatabase(binding.root.context)
@@ -183,7 +208,7 @@ class ExploreAdapter(
             binding.btnComment.setOnClickListener {
                 val comment = binding.etComment.text.toString().trim()
                 if (comment.isNotEmpty()) {
-                    binding.tvComment.text = "💬 $comment"
+                    binding.tvComment.text = " $comment"
                     binding.tvComment.visibility = View.VISIBLE
                     binding.etComment.setText("")
                     GlobalScope.launch {
