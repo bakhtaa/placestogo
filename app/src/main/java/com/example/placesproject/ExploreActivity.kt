@@ -204,7 +204,7 @@ class ExploreAdapter(
                 val comment = binding.etComment.text.toString()
                 onLike(photo, comment)
             }
-
+       //
             binding.btnComment.setOnClickListener {
                 val comment = binding.etComment.text.toString().trim()
                 if (comment.isNotEmpty()) {
